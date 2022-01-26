@@ -30,21 +30,21 @@ async def root():
 @app.post("/api/update_question")
 async def update_question(q_in: Question):
     question = q_in.dict()
-    assignment_id = question['AssignmentId']
-    del question['AssignmentId']
-    redis.execute_command('JSON.SET', assignment_id, '.', json.dumps(question))
-    return {assignment_id: question}
+    article = question['Article']
+    del question['Article']
+    redis.execute_command('JSON.SET', article, '.', json.dumps(question))
+    return {article: question}
 
 
-@app.get("/api/{id_in}")
-async def vote_count(id_in):
-    question = redis.execute_command('JSON.GET', id_in)
+@app.get("/api/count/{article}")
+async def vote_count(article):
+    question = redis.execute_command('JSON.GET', article)
     if question == None:
-        return {id_in: {'Q_Drop_Score': -1, 'A_Drop_Score': -1, 'Total_Possible_Score': -1}}
+        return {article: {'AssignmentId': -1, 'Q_Drop_Score': -1, 'A_Drop_Score': -1, 'Total_Possible_Score': -1}}
     question = json.loads(question)
-    return {id_in: {'Q_Drop_Score': question['Q_Drop_Score'], 'A_Drop_Score': question['A_Drop_Score'], 'Total_Possible_Score': question['Total_Possible_Score']}}
+    return {article: {'AssignmentId': question['AssignmentId'], 'Q_Drop_Score': question['Q_Drop_Score'], 'A_Drop_Score': question['A_Drop_Score'], 'Total_Possible_Score': question['Total_Possible_Score']}}
 
 
-@app.get("/api/{wiki_article}")
+@app.get("/api/exist/{wiki_article}")
 async def wiki_exist(wiki_article):
-    pass
+    return ({wiki_article: {'used': False}} if redis.execute_command('JSON.GET', wiki_article) == None else {wiki_article: {'used': True}})
