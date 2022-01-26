@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import json
 import os
 import redis
+import uvicorn
 
 app = FastAPI()
 redis = redis.Redis(host=os.environ.get('REDIS_HOST'), port=os.environ.get(
