@@ -1,4 +1,4 @@
-# 🗿 CausalQA API
+# 🗿 CausalQAPI
 This API was made so we would be able to keep track of out MTurk data validation pipeline. The API is currently hosted with the base URL being `https://api.justinchang.dev:50000`. 
 
 ## 💻 The Tech
