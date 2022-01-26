@@ -22,6 +22,7 @@ Currently, the only "model" in use is the `Question` model. The `Question` model
 **Note:** These "models" aren't actual SQL tables (Redis is a key-value store). Rather, they are just used to validate that all of the input parameters are present. 
 
 ## 📍 Endpoints
+The base URL for the endpoints is tentatively `https://api.justinchang.dev:50000`. 
 - **GET** `/api`
   - Hello world test
 - **POST** `/api/update_question`
