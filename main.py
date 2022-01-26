@@ -31,7 +31,9 @@ async def root():
 @app.post("/api/update_question")
 async def update_question(q_in: Question):
     question = q_in.dict()
-    article = question['Article']
+    article = question['Article'].replace("https://en.wikipedia.org/wiki/", "")
+    article = article.substring(0, article.index(
+        "#")) if article.index("#") > 0 else article
     del question['Article']
     redis.execute_command('JSON.SET', article, '.', json.dumps(question))
     return {article: question}
