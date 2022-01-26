@@ -45,6 +45,11 @@ async def vote_count(article):
     return {article: {'AssignmentId': question['AssignmentId'], 'Q_Drop_Score': question['Q_Drop_Score'], 'A_Drop_Score': question['A_Drop_Score'], 'Total_Possible_Score': question['Total_Possible_Score']}}
 
 
-@app.get("/api/exist/{wiki_article}")
-async def wiki_exist(wiki_article):
-    return ({wiki_article: {'used': False}} if redis.execute_command('JSON.GET', wiki_article) == None else {wiki_article: {'used': True}})
+@app.get("/api/exist/{article}")
+async def wiki_exist(article):
+    return ({article: {'exists': False}} if redis.execute_command('JSON.GET', article) == None else {article: {'exists': True}})
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=50000,
+                ssl_keyfile=os.environ.get('SSL_KEY'), ssl_certfile=os.environ.get('SSL_CERT'),
+                reload=True)
