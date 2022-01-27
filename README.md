@@ -59,6 +59,9 @@ Currently, the only "model" in use is the `Question` model. The `Question` model
   - Returns the `Q_Drop_Score`, `A_Drop_Score`, and `Total_Possible_Score` for the questions with `:article_name` an `:assignment_id`
 - **GET** `/api/count/:article_name`
   - Returns the number of questions with `:article_name`
+- **GET** `/api/count/:comparison/:count`
+  - Returns all articles where the `:comparison` of the number of questions and the `:count` is true
+  - Accepted comparisons: `eq`, `gt`, `lt`, `gte`, `lte`
 
 ## 💡 Feature Requests
 If more features are needed, please open an issue on this repository. 
