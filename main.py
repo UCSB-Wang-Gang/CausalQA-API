@@ -38,8 +38,8 @@ async def update_question(q_in: Question):
     del question['Article']
     del question['AssignmentId']
 
-    prev_article = redis.execute_command('JSON.GET', article)
     out = ({} if prev_article == None else json.loads(prev_article))
+    prev_article = redis.execute_command('JSON.GET', article)
     out[id] = question
     redis.execute_command('JSON.SET', article, '.', json.dumps(out))
     return {article: out}
@@ -80,6 +80,30 @@ async def article_count(article_name):
         return {article_name: {'count': 0}}
     article = json.loads(article)
     return{article_name: {'count': len(article.keys())}}
+
+
+comparisons = {
+    "eq": lambda x, y: x == y,
+    "gt": lambda x, y: x > y,
+    "lt": lambda x, y: x < y,
+    "geq": lambda x, y: x >= y,
+    "leq": lambda x, y: x <= y,
+}
+
+
+@app.get("/api/count/{comparison}/{count}")
+async def article_count(comparison, count):
+    if comparison not in comparisons.keys():
+        return {"Error": "Invalid comparison"}
+
+    out = {}
+    for article_name in redis.scan_iter("*"):
+        article = json.loads(redis.execute_command('JSON.GET', article_name))
+        key_count = len(article.keys())
+        if comparisons[comparison](key_count, int(count)):
+            out[article_name] = {'count': key_count}
+    return out
+
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=50000,
