@@ -31,26 +31,55 @@ async def root():
 @app.post("/api/update_question")
 async def update_question(q_in: Question):
     question = q_in.dict()
+    id = question['AssignmentId']
     article = question['Article'].replace("https://en.wikipedia.org/wiki/", "")
     article = article[0:article.index("#")] if article.index(
         "#") > 0 else article
     del question['Article']
-    redis.execute_command('JSON.SET', article, '.', json.dumps(question))
-    return {article: question}
+    del question['AssignmentId']
+
+    prev_article = redis.execute_command('JSON.GET', article)
+    out = ({} if prev_article == None else json.loads(prev_article))
+    out[id] = question
+    redis.execute_command('JSON.SET', article, '.', json.dumps(out))
+    return {article: out}
 
 
-@app.get("/api/count/{article}")
-async def vote_count(article):
-    question = redis.execute_command('JSON.GET', article)
-    if question == None:
-        return {article: {'AssignmentId': -1, 'Q_Drop_Score': -1, 'A_Drop_Score': -1, 'Total_Possible_Score': -1}}
-    question = json.loads(question)
-    return {article: {'AssignmentId': question['AssignmentId'], 'Q_Drop_Score': question['Q_Drop_Score'], 'A_Drop_Score': question['A_Drop_Score'], 'Total_Possible_Score': question['Total_Possible_Score']}}
+@app.get("/api/scores/{article_name}")
+async def article_scores(article_name):
+    questions = redis.execute_command('JSON.GET', article_name)
+    if questions == None:
+        return {}
+
+    out = {}
+    questions = json.loads(questions)
+    for q in questions.keys():
+        out[q] = {'Q_Drop_Score': questions[q]['Q_Drop_Score'], 'A_Drop_Score': questions[q]
+                  ['A_Drop_Score'], 'Total_Possible_Score': questions[q]['Total_Possible_Score']}
+    return {article_name: out}
 
 
-@app.get("/api/exist/{article}")
-async def wiki_exist(article):
-    return ({article: {'exists': False}} if redis.execute_command('JSON.GET', article) == None else {article: {'exists': True}})
+@app.get("/api/scores/{article_name}/{assignment_id}")
+async def article_scores(article_name, assignment_id):
+    questions = redis.execute_command('JSON.GET', article_name)
+    if questions == None:
+        return {}
+
+    out = {}
+    questions = json.loads(questions)
+    return ({} if assignment_id not in questions.keys()
+            else {article_name: {assignment_id: {'Q_Drop_Score': questions[assignment_id]['Q_Drop_Score'],
+                                                 'A_Drop_Score': questions[assignment_id]['A_Drop_Score'],
+                                                 'Total_Possible_Score': questions[assignment_id]['Total_Possible_Score']}}})
+
+
+@app.get("/api/count/{article_name}")
+async def article_count(article_name):
+    article = redis.execute_command('JSON.GET', article_name)
+    if article == None:
+        return {article_name: {'count': 0}}
+    article = json.loads(article)
+    return{article_name: {'count': len(article.keys())}}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=50000,
