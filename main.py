@@ -47,8 +47,8 @@ async def update_question(q_in: Question):
     del question['Article']
     del question['AssignmentId']
 
-    out = ({} if prev_article == None else json.loads(prev_article))
     prev_article = redis.execute_command('JSON.GET', article)
+    out = ({} if prev_article == None else json.loads(prev_article))
     out[id] = question
     redis.execute_command('JSON.SET', article, '.', json.dumps(out))
     return {article: out}
