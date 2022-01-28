@@ -42,7 +42,7 @@ async def update_question(q_in: Question):
     question = q_in.dict()
     id = question['AssignmentId']
     article = question['Article'].replace("https://en.wikipedia.org/wiki/", "")
-    article = article[0:article.index("#")] if article.index(
+    article = article[0:article.index("#")] if article.find(
         "#") > 0 else article
     del question['Article']
     del question['AssignmentId']
