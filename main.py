@@ -19,6 +19,11 @@ app.add_middleware(
 )
 
 
+class Vote(BaseModel):
+    Q_Drop_Score_Change: int
+    A_Drop_Score_Change: int
+
+
 class Question(BaseModel):
     HITId: str
     AssignmentId: str
@@ -26,9 +31,6 @@ class Question(BaseModel):
     Question: str
     Answer: str
     Article: str
-    Q_Drop_Score: str
-    A_Drop_Score: str
-    Total_Possible_Score: str
 
 
 @app.get("/api")
@@ -45,6 +47,9 @@ async def update_question(q_in: Question):
         "#") > 0 else article
     del question['Article']
     del question['AssignmentId']
+    question['Q_Drop_Score'] = 0
+    question['A_Drop_Score'] = 0
+    question['Total_Possible_Score'] = 0
 
     prev_article = redis.execute_command('JSON.GET', article)
     out = ({} if prev_article == None else json.loads(prev_article))
@@ -81,7 +86,29 @@ async def article_scores(article_name, assignment_id):
                                                  'Total_Possible_Score': questions[assignment_id]['Total_Possible_Score']}}})
 
 
-@app.get("/api/count/{article_name}")
+@app.post("/api/scores/{article_name}/{assignment_id}")
+async def article_scores(article_name, assignment_id, v_in: Vote):
+    vote = v_in.dict()
+    questions = redis.execute_command('JSON.GET', article_name)
+    if questions == None:
+        return {}
+
+    out = {}
+    questions = json.loads(questions)
+    if assignment_id not in questions.keys():
+        return {}
+    else:
+        questions[assignment_id]['Q_Drop_Score'] += vote['Q_Drop_Score_Change']
+        questions[assignment_id]['A_Drop_Score'] += vote['A_Drop_Score_Change']
+        questions[assignment_id]['Total_Possible_Score'] += 1
+        redis.execute_command('JSON.SET', article_name,
+                              '.', json.dumps(questions))
+        return {article_name: {assignment_id: {'Q_Drop_Score': questions[assignment_id]['Q_Drop_Score'],
+                                               'A_Drop_Score': questions[assignment_id]['A_Drop_Score'],
+                                               'Total_Possible_Score': questions[assignment_id]['Total_Possible_Score']}}}
+
+
+@ app.get("/api/count/{article_name}")
 async def article_count(article_name):
     article = redis.execute_command('JSON.GET', article_name)
     if article == None:
@@ -99,7 +126,7 @@ comparisons = {
 }
 
 
-@app.get("/api/count/{comparison}/{count}")
+@ app.get("/api/count/{comparison}/{count}")
 async def article_count(comparison, count):
     if comparison not in comparisons.keys():
         return {"Error": "Invalid comparison"}

@@ -41,10 +41,10 @@ Currently, the only "model" in use is the `Question` model. The `Question` model
   - Question `str`
   - Answer `str`
   - Article `str`
-  - Fact `str`
-  - Q_Drop_Score `str`
-  - A_Drop_Score `str`
-  - Total_Possible_Score `str`
+
+### Vote
+  - Q_Drop_Score_Change `int`
+  - A_Drop_Score_Change `int`
 
 ## 📍 Endpoints
 - **GET** `/api`
@@ -56,6 +56,9 @@ Currently, the only "model" in use is the `Question` model. The `Question` model
 - **GET** `/api/scores/:article_name`
   - Returns the `Q_Drop_Score`, `A_Drop_Score`, and `Total_Possible_Score` for all questions in `:article_name`
 - **GET** `/api/scores/:article_name/:assignment_id`
+  - Returns the `Q_Drop_Score`, `A_Drop_Score`, and `Total_Possible_Score` for the questions with `:article_name` an `:assignment_id`
+- **POST** `/api/scores/:article_name/:assignment_id`
+  - Updates a question's `Q_Drop_Score`, `A_Drop_Score`, and `Total_Possible_Score` using the given `Vote` model
   - Returns the `Q_Drop_Score`, `A_Drop_Score`, and `Total_Possible_Score` for the questions with `:article_name` an `:assignment_id`
 - **GET** `/api/count/:article_name`
   - Returns the number of questions with `:article_name`
