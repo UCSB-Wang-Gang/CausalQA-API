@@ -26,7 +26,6 @@ class Question(BaseModel):
     Question: str
     Answer: str
     Article: str
-    Fact: str
     Q_Drop_Score: str
     A_Drop_Score: str
     Total_Possible_Score: str
