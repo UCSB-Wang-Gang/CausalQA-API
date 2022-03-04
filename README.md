@@ -46,6 +46,10 @@ Currently, the only "model" in use is the `Question` model. The `Question` model
   - Q_Drop_Score_Change `int`
   - A_Drop_Score_Change `int`
 
+## Passage
+  - Article `str`
+  - Passage `str`
+
 ## 📍 Endpoints
 - **GET** `/api`
   - Hello world test
@@ -65,6 +69,10 @@ Currently, the only "model" in use is the `Question` model. The `Question` model
 - **GET** `/api/count/:comparison/:count`
   - Returns all articles where the `:comparison` of the number of questions and the `:count` is true
   - Accepted comparisons: `eq`, `gt`, `lt`, `gte`, `lte`
+- **POST** `/api/scores/add_passage`
+  - Takes in a `Passage` model, parses and stores the passage and the indices of its causal patterns (e.g. "because", "due to", "thus")
+- **GET** `/api/get_passage`
+  - Returns and deletes a random passage from the database
 
 ## 💡 Feature Requests
 If more features are needed, please open an issue on this repository. 
