@@ -209,13 +209,12 @@ async def get_passage():
     passage = None
     while passage == None:
         key = redis.randomkey()
-        article = json.loads(redis.execute_command(
-            'JSON.GET', key))
+        article = json.loads(redis.execute_command('JSON.GET', key))
         if 'passages' in article.keys() and len(article['passages']):
             passage = article['passages'][0]
             article['passages'].pop(0)
-            redis.execute_command('JSON.SET', key,
-                                  '.', json.dumps(article))
+            passage['article'] = key
+            redis.execute_command('JSON.SET', key, '.', json.dumps(article))
     return passage
 
 if __name__ == "__main__":
