@@ -2,6 +2,7 @@ import json
 import os
 import re
 
+import boto3
 import redis
 import uvicorn
 from fastapi import FastAPI
@@ -11,6 +12,7 @@ from pydantic import BaseModel
 app = FastAPI()
 redis = redis.Redis(host=os.environ.get('REDIS_HOST'), port=os.environ.get(
     'REDIS_PORT'), username=os.environ.get('REDIS_USERNAME'), password=os.environ.get('REDIS_PASSWORD'))
+# mturk = boto3.client('mturk')
 
 app.add_middleware(
     CORSMiddleware,
@@ -48,6 +50,14 @@ async def root():
 @app.post("/api/update_question")
 async def update_question(q_in: Question):
     question = q_in.dict()
+
+    # mturk.associate_qualification_with_worker(
+    #     QualificationTypeId='string',  # TODO
+    #     WorkerId=question['WorkerId'],
+    #     IntegerValue=123,
+    #     SendNotification=False
+    # )
+
     id = question['AssignmentId']
     article = question['Article'].replace("https://en.wikipedia.org/wiki/", "")
     article = article[0:article.index("#")] if article.find(
@@ -219,5 +229,5 @@ async def get_passage():
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=50000,
-                ssl_keyfile=os.environ.get('SSL_KEY'), ssl_certfile=os.environ.get('SSL_CERT'),
+                # ssl_keyfile=os.environ.get('SSL_KEY'), ssl_certfile=os.environ.get('SSL_CERT'),
                 reload=True)
