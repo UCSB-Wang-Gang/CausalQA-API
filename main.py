@@ -146,16 +146,26 @@ async def article_count(comparison, count):
             out[article_name] = {'count': key_count}
     return out
 
-patterns = [
+raw_patterns = [
     'because',
     'due to',
     'thus',
     'therefore',
     'causes',
+    'caused',
+    'causing',
     'consequently',
     'consequence',
     'hence',
     'result of',
+    'resulted',
+    'resulting',
+    'induced',
+    'inducing',
+    'provoked',
+    'provoking',
+    'elicited',
+    'eliciting',
     'accordingly',
     'owing to',
     'based on',
@@ -167,21 +177,32 @@ patterns = [
     'on account of',
     'on this ground',
     'on these grounds',
-    'based on',
     'sake',
-    'although',
     'leads to',
     'led to',
-    'indicate',
-    'subsequently',
+    'leading to',
+    # 'subsequently',
+    # 'indicate',
+    # 'although',
 ]
 
+# (1) make the first char case insensitive
+# (2) require word boundaries on either side
+def make_regex_dict(patterns):
+    regex_patterns = {}
+    for pattern in patterns:
+        char1 = pattern[0]
+        p = '[' + char1 + char1.upper() + ']' + pattern[1:]
+        regex_patterns[r'\b' + p + r'\b'] = pattern
+    return regex_patterns
+
+patterns = make_regex_dict(raw_patterns)
 
 def get_patterns(passage):
     out = {}
     for pattern in patterns:
         for index in [m.start() for m in re.finditer(pattern, passage)]:
-            out[str(index)] = pattern
+            out[str(index)] = patterns[pattern]
     return out
 
 
